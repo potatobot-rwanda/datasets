@@ -4,6 +4,10 @@
 
 ### Reading List
 
+[LLM Prompting](https://www.promptingguide.ai/)
+* Read first section (Introduction and all sub-chapters under Introduction)
+* Read [Few shot prompting](https://www.promptingguide.ai/techniques/fewshot)
+
 TimeML standard (especially the TimeX3 standard for temporal expressions)
 * [TimeML Website](https://timeml.github.io/site/index.html)
 * [TimeX3 specifications](https://timeml.github.io/site/publications/timeMLdocs/timeml_1.2.1.html#timex3)
@@ -52,37 +56,57 @@ This example contains annotations for all entity types LOCATION, POTATO and TIME
 
 ### Generate NER data
 
-This prompt (in chatgpt) will generate training data for 
+I used this prompt to develop my prompt:
 
 ```
-Create 10 sentences in English with temporal expressions in TimeML / TIMEX3 format.  Create a variety of different tepmoral expressins, e.g.
+Generate 5 conversations between a chatbot and a Rwandan farmer. The farmer calls the chatbot because he wants to know when to spray his potatoes. The chatbot asks four questions to the user:
 
-* absolute dates (e.g., 2025-07-01)
-* relative dates (e.g., next Tuesday)
-* year/month dates (e.g., 2024-12)
-* recency references like "last Friday"
+* When did you last spray your potatoes?
+* When did you plant your potatoes?
+* Where is your farm located?
+* Which potato variety do you plant?
 
-Assume that todays date is 28.7.2025.
+Here are some more instructions:
+* Assume that today is 28.6.2025
+* The chatbot always starts the conversation
+* You do not need to create the whole conversation. You need to create at least one chatbot utterance and one user response.
+* These are possible potato varieties: Red Bliss, New Potatoes, Fingerling, French Fingerling, Russian Banana, Rose Finn Apple, Austrian Crescent, La Ratte, German Butterball
+* The user answers only with the information he was asked for.
+* In the user message, annotate the necessary information:
+    * last spray date: as TIMEX3 (TIMEML). add a tag option="LAST_SPRAY_DATE"
+    * potato plant date: as TIMEX3 (TIMEML). add a tag option="PLANT_DATE"
+    * wrap the location with a <LOCATION> tag
+    * wrap the potato variety with a <POTATO> tag
 
-Use this format:
+Here are examples:
 
-We are leaving for vacation on <TIMEX3 tid="t1" type="DATE" value="2025-07-05">July 5th</TIMEX3>.
-The seminar was held on <TIMEX3 tid="t2" type="DATE" value="2025-06-15">June 15th</TIMEX3>.
-She will submit the report by <TIMEX3 tid="t3" type="DATE" value="2025-06-30">Monday</TIMEX3>.
-I was born on <TIMEX3 tid="t4" type="DATE" value="1990-02-14">February 14, 1990</TIMEX3>.
+CONVERSATION
+
+Chatbot: Hello, I can tell you when to spray your potatoes. When did you last spray?
+User: I last sprayed my potatoes <TIMEX3 type="DATE"  option="LAST_SPRAY_DATE" value="2025-06">in June</TIMEX3>.
+
+CONVERSATION
+
+Chatbot: Where is your farm located?
+User: In <LOCATION>Musanze</LOCATION>.
+Chatbot: When did you last spray your potatoes?
+User: I last sprayed my <POTATO>French Fingerlings</POTATO> <TIMEX3 tid="t171" type="DATE" option="LAST_SPRAY_DATE" value="2025-04">two months ago</TIMEX3>
+
+CONVERSATION
+
+Chatbot: Chatbot: Hello! I can help you spray at the right time. When did you last spray your potatoes?
+User: <TIMEX3 type="DATE" value="2025-05-15" option="LAST_SPRAY_DATE">About six weeks ago</TIMEX3>.
+Chatbot: When were they planted?
+User: <TIMEX3 type="DATE" value="2025-05-15" option="PLANT_DATE">About six weeks ago</TIMEX3>.
+
+CONVERSATION
+
+Chatbot: Hello! I can help you determine the right time to spray. When did you last spray your potatoes?
+User: I last sprayed my <POTATO>German Butterball</POTATO> potatoes <TIMEX3 tid="t301" type="DATE" option="LAST_SPRAY_DATE" value="2025-06-12">about two weeks ago</TIMEX3>. 
 ```
 
-Output:
+Then, I used this prompt multiple times to generate training data
 
 ```
-The invitation was sent on <TIMEX3 tid="t55" type="DATE" value="2025-06-26">Thursday</TIMEX3>.
-She’ll begin her new job on <TIMEX3 tid="t56" type="DATE" value="2025-07-08">July 8th</TIMEX3>.
-We last met in <TIMEX3 tid="t57" type="DATE" value="2025-05">May</TIMEX3>.
-He plans to retire in <TIMEX3 tid="t58" type="DATE" value="2030-01">January 2030</TIMEX3>.
-The flight departs on <TIMEX3 tid="t59" type="DATE" value="2025-07-02">Wednesday</TIMEX3>.
-She returned from Kenya on <TIMEX3 tid="t60" type="DATE" value="2025-06-21">June 21st</TIMEX3>.
-The festival will take place in <TIMEX3 tid="t61" type="DATE" value="2025-09">September</TIMEX3>.
-The contract starts on <TIMEX3 tid="t62" type="DATE" value="2025-07-01">Tuesday</TIMEX3>.
-I enrolled in university in <TIMEX3 tid="t63" type="DATE" value="2012">2012</TIMEX3>.
-The anniversary falls on <TIMEX3 tid="t64" type="DATE" value="2025-08-30">August 30th</TIMEX3>.
+Great! Please generate another 5000 examples in CSV format. 
 ```
